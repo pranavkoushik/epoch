@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard - Admin & Participant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Planet+Cosmos&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #001f3f, #001a33);
+            color: white;
+            font-family: 'Planet Cosmos', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 50px;
+        }
+
+        header img {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        header img.left-logo {
+            height: 70px;
+        }
+
+        header img.right-logo {
+            height: 140px;
+            margin-left: auto;
+            margin-right: 200px;
+        }
+
+        h1 {
+            margin: 30px 0;
+            color: #00c3ff;
+            text-shadow: 0 4px 10px rgba(0, 195, 255, 0.6);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        select, input[type="number"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 400px;
+            background-color: #003366;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #00c3ff;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #009fd9;
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 90%;
+            max-width: 800px;
+            color: #00c3ff;
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid white;
+        }
+
+        th {
+            background: #00264d;
+        }
+
+        td {
+            background: #003366;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/download.png" alt="Left Logo" class="left-logo">
+        <img src="/download (1).png" alt="Right Logo" class="right-logo">
+    </header>
+
+    <!-- Admin Section -->
+    <section>
+        <h1>Admin - Update Scores</h1>
+        <label for="team-name">Select Team</label>
+        <select id="team-name">
+            <option value="">-- Select Team --</option>
+            <script>
+                const allTeams = [
+                    "Autism", "ABZ", "Code EPOCHalypse", "Team Nepal", "tech trio", "The boys", "Syntax Squad",
+                    "Coding Ninjas", "Null Pointers", "Tech Titans", "Smarty pints", "techPros", "Byte Me",
+                    "Sytax Surgeons", "Monks Adda", "AAS( Arjun Abhy Sidd)", "Game Changers", "The learning loop",
+                    "The Ajeya", "Code Warriors", "DEBUGGERS", "The Gladiators", "HACKTIVATORS", "Knsh",
+                    "Team Tech", "Pseudo Coders", "CodeNest", "Binary Brain", "Syntax Jacks", "Ambitious",
+                    "Inovation In You", "Binary Bandits", "404 Brain not Found", "Drushti", "Mammi ke magarmach",
+                    "ByteMe", "BYTE BENDERS", "Code Whisperers", "HaxStreet", "TECH_MONKS", "ILLU-MINATI",
+                    "Code Craft", "< PROFESSORS >", "Tech falcons", "The Maverick Alliance", "Ctrl Alt Del",
+                    "The wolf pack", "Terminal terminator", "Data wizards", "Debug ninjas", "Juice Pilado🍹",
+                    "Hackbountiz", "Autistic Neggas", "CodeX", "Debugging Dragons", "Dibble dobble", "The Fantastic 4"
+                ];
+
+                allTeams.forEach(team => {
+                    document.write(`<option>${team}</option>`);
+                });
+            </script>
+        </select>
+
+        <label for="team-score">Score</label>
+        <input type="number" id="team-score" placeholder="Enter Team Score">
+
+        <button onclick="updateScore()">Update Score</button>
+
+        <script>
+            function updateScore() {
+                const teamName = document.getElementById('team-name').value;
+                const teamScore = parseInt(document.getElementById('team-score').value.trim(), 10);
+
+                if (!teamName || isNaN(teamScore)) {
+                    alert('Please select a team and enter a valid score!');
+                    return;
+                }
+
+                const scores = JSON.parse(localStorage.getItem('scores-update')) || {};
+                scores[teamName] = teamScore;
+
+                localStorage.setItem('scores-update', JSON.stringify(scores));
+                alert(`Score updated for ${teamName}`);
+                document.getElementById('team-name').value = '';
+                document.getElementById('team-score').value = '';
+            }
+        </script>
+    </section>
+
+    <hr>
+
+    <!-- Live Leaderboard Section -->
+    <section>
+        <h1>Live Leaderboard</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Team Name</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard">
+                <!-- Dynamic rows will be populated here -->
+            </tbody>
+        </table>
+
+        <script>
+            function renderLeaderboard() {
+                // Get scores from localStorage
+                const scores = JSON.parse(localStorage.getItem('scores-update')) || {};
+
+                // Merge all teams with their scores (default score is 0 if not present)
+                const leaderboardData = allTeams.map(team => ({
+                    name: team,
+                    score: scores[team] || 0
+                }));
+
+                // Sort teams by score in descending order
+                leaderboardData.sort((a, b) => b.score - a.score);
+
+                // Render the leaderboard table
+                const leaderboard = document.getElementById('leaderboard');
+                leaderboard.innerHTML = '';
+
+                leaderboardData.forEach((team, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${team.name}</td>
+                        <td>${team.score}</td>
+                    `;
+                    leaderboard.appendChild(row);
+                });
+            }
+
+            // Refresh leaderboard every second
+            setInterval(renderLeaderboard, 1000);
+        </script>
+    </section>
+</body>
+</html>
